@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민규님 운동관리</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root {
+  --bg:#0f0f0f; --surface:#1a1a1a; --surface2:#242424;
+  --border:#2e2e2e; --text:#f0ede8; --muted:#6b6b6b;
+  --accent:#e8533a; --accent2:#f0a500; --green:#4caf7d;
+  --blue:#4a9eff; --purple:#9b7fe8;
+  --font:'Noto Sans KR',sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;}
+
+.nav{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100;flex-wrap:wrap;gap:8px;}
+.nav-logo{font-size:13px;font-weight:700;color:var(--accent);font-family:var(--mono);}
+.nav-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.nav-tabs{display:flex;gap:2px;}
+.nav-tab{padding:5px 11px;border-radius:6px;font-size:12px;cursor:pointer;border:none;background:none;color:var(--muted);font-family:var(--font);transition:all .15s;}
+.nav-tab.active{background:var(--surface2);color:var(--text);}
+
+.conn-wrap{display:flex;gap:6px;align-items:center;}
+.conn-item{display:flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);}
+.conn-dot.on{background:var(--green);}
+.conn-btn{padding:4px 9px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--font);white-space:nowrap;}
+.conn-btn.on{border-color:var(--green);color:var(--green);}
+
+.page{display:none;padding:18px;max-width:800px;margin:0 auto;}
+.page.active{display:block;}
+
+.today-meta{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;}
+.today-title{font-size:24px;font-weight:900;margin-bottom:3px;}
+.today-type{font-size:12px;color:var(--accent);font-family:var(--mono);margin-bottom:18px;}
+
+.day-sel{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px;}
+.day-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:none;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;font-family:var(--font);}
+.day-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.day-btn.has-rec{border-color:var(--green);color:var(--green);}
+
+.prog-wrap{margin-bottom:16px;}
+.prog-info{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;font-family:var(--mono);}
+.prog-bar{height:3px;background:var(--border);border-radius:2px;}
+.prog-fill{height:100%;border-radius:2px;background:var(--green);transition:width .4s;}
+
+.rh{border-radius:10px;padding:16px 18px;margin-bottom:12px;border:1px solid var(--border);}
+.rh-lbl{font-size:10px;font-family:var(--mono);letter-spacing:.1em;margin-bottom:4px;opacity:.7;}
+.rh-title{font-size:17px;font-weight:700;margin-bottom:6px;}
+.rh-muscles{display:flex;gap:4px;flex-wrap:wrap;}
+.mtag{font-size:10px;padding:2px 7px;border-radius:8px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);}
+.rh-a{border-color:#4a9eff44;background:linear-gradient(135deg,#4a9eff0d,transparent);}
+.rh-b{border-color:#4caf7d44;background:linear-gradient(135deg,#4caf7d0d,transparent);}
+.rh-c{border-color:#9b7fe844;background:linear-gradient(135deg,#9b7fe80d,transparent);}
+.rh-d{border-color:#f0a50044;background:linear-gradient(135deg,#f0a5000d,transparent);}
+.rh-e{border-color:#e8533a44;background:linear-gradient(135deg,#e8533a0d,transparent);}
+.rh-f{border-color:#9b7fe844;background:linear-gradient(135deg,#9b7fe80d,transparent);}
+.rh-rest{border-color:var(--border);background:var(--surface);}
+
+.sec-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:.1em;margin:14px 0 5px 2px;}
+
+.ex-card{border:1px solid var(--border);border-radius:10px;margin-bottom:6px;background:var(--surface);overflow:hidden;transition:border-color .15s;}
+.ex-card.done{border-color:var(--green);}
+.ex-card-hdr{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;cursor:pointer;}
+.ex-chk{width:19px;height:19px;border:1.5px solid var(--border);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.ex-chk.done{background:var(--green);border-color:var(--green);}
+.ex-chk.done::after{content:'✓';color:#fff;font-size:11px;font-weight:700;}
+.ex-info{flex:1;}
+.ex-name{font-size:13px;font-weight:500;margin-bottom:2px;}
+.ex-detail{font-size:11px;color:var(--muted);margin-bottom:4px;font-family:var(--mono);}
+.ex-tags{display:flex;gap:3px;flex-wrap:wrap;}
+.etag{font-size:10px;padding:1px 5px;border-radius:5px;}
+.t-main{background:#4a9eff1a;color:#4a9eff;}
+.t-back{background:#f0a5001a;color:#f0a500;}
+.t-knee{background:#e8533a1a;color:#e8533a;}
+.t-sh{background:#9b7fe81a;color:#9b7fe8;}
+.t-sub{background:var(--surface2);color:var(--muted);}
+.ex-arrow{font-size:12px;color:var(--muted);margin-left:6px;flex-shrink:0;margin-top:2px;transition:transform .2s;}
+.ex-arrow.open{transform:rotate(180deg);}
+
+.sets-area{padding:0 14px 12px;border-top:1px solid var(--border);display:none;}
+.sets-area.open{display:block;}
+.sets-hdr{display:grid;grid-template-columns:28px 1fr 1fr 32px;gap:6px;padding:8px 2px 4px;font-size:10px;color:var(--muted);font-family:var(--mono);text-align:center;}
+.set-row{display:grid;grid-template-columns:28px 1fr 1fr 32px;gap:6px;align-items:center;margin-bottom:5px;}
+.set-num{font-size:11px;font-family:var(--mono);color:var(--muted);text-align:center;}
+.set-inp{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 4px;font-size:14px;color:var(--text);font-family:var(--mono);text-align:center;width:100%;}
+.set-inp:focus{outline:none;border-color:var(--accent2);}
+.set-inp.filled{border-color:#4caf7d55;color:var(--green);}
+.set-ok{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.set-ok.done{background:var(--green);border-color:var(--green);color:#fff;}
+.add-set{width:100%;padding:6px;border-radius:6px;border:1px dashed var(--border);background:none;color:var(--muted);font-size:11px;cursor:pointer;margin-top:5px;font-family:var(--font);}
+.add-set:hover{border-color:var(--muted);color:var(--text);}
+
+.bottom-bar{margin-top:14px;}
+.cond-row{display:flex;align-items:center;gap:5px;margin-bottom:8px;flex-wrap:wrap;}
+.cond-lbl{font-size:11px;color:var(--muted);}
+.cond-btn{padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font);}
+.cond-btn.active{background:var(--accent2);border-color:var(--accent2);color:#000;}
+.memo-inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13px;color:var(--text);font-family:var(--font);resize:none;height:56px;margin-bottom:9px;}
+.memo-inp:focus{outline:none;border-color:var(--muted);}
+.save-btn{width:100%;padding:14px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s;}
+.save-btn:hover{opacity:.85;}
+.save-btn:active{transform:scale(.98);}
+.save-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-title{font-size:19px;font-weight:700;}
+.cal-navs{display:flex;gap:5px;}
+.cal-nav-btn{width:29px;height:29px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:18px;}
+.cal-dlbl{text-align:center;font-size:10px;color:var(--muted);font-family:var(--mono);padding:4px 0;}
+.cal-cell{aspect-ratio:1;border-radius:7px;border:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;min-height:46px;}
+.cal-cell:hover{border-color:var(--muted);}
+.cal-cell.today{border-color:var(--accent);}
+.cal-cell.has-rec{background:#4caf7d12;border-color:var(--green);}
+.cal-cell.rest-day{opacity:.3;}
+.cal-cell.empty{background:transparent;border-color:transparent;cursor:default;}
+.cal-date{font-size:12px;font-weight:500;}
+.cal-type{font-size:9px;font-family:var(--mono);margin-top:1px;}
+.cal-type.A{color:var(--blue);}.cal-type.B{color:var(--green);}
+.cal-type.C{color:var(--purple);}.cal-type.D{color:var(--accent2);}
+.cal-type.E{color:var(--accent);}.cal-type.F{color:var(--purple);}
+.cal-dot{width:5px;height:5px;border-radius:50%;background:var(--green);margin-top:2px;}
+.cal-detail{padding:13px 15px;border-radius:10px;border:1px solid var(--border);background:var(--surface);margin-top:5px;}
+
+.log-item{display:flex;align-items:flex-start;gap:9px;padding:12px 13px;border-radius:8px;margin-bottom:5px;border:1px solid var(--border);background:var(--surface);}
+.log-date{font-size:11px;font-family:var(--mono);color:var(--muted);min-width:72px;}
+.log-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;font-family:var(--mono);flex-shrink:0;}
+.bA{background:#4a9eff1a;color:var(--blue);}.bB{background:#4caf7d1a;color:var(--green);}
+.bC{background:#9b7fe81a;color:var(--purple);}.bD{background:#f0a5001a;color:var(--accent2);}
+.bE{background:#e8533a1a;color:var(--accent);}.bF{background:#9b7fe81a;color:var(--purple);}
+.log-info{flex:1;}
+.log-name{font-size:13px;font-weight:500;}
+.log-sub{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px;line-height:1.6;}
+.log-sets-txt{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.7;}
+.log-sync{font-size:10px;margin-top:2px;}
+.log-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:3px;}
+.log-del:hover{color:var(--accent);}
+
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:18px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px;}
+.stat-val{font-size:28px;font-weight:900;font-family:var(--mono);color:var(--accent);}
+.stat-unit{font-size:11px;color:var(--muted);}
+.stat-label{font-size:11px;color:var(--muted);margin-top:2px;}
+
+.w-card{padding:10px 13px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:5px;}
+.w-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.w-card-name{font-size:12px;font-weight:500;}
+.w-card-diff{font-size:11px;font-family:var(--mono);}
+.w-card-last{font-size:11px;color:var(--muted);font-family:var(--mono);}
+
+.rest-card{border:1px solid var(--border);border-radius:12px;padding:36px;text-align:center;background:var(--surface);}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 18px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%;text-align:center;}
+.toast.show{opacity:1;}
+.toast.success{border-color:var(--green);color:var(--green);}
+.toast.error{border-color:var(--accent);color:var(--accent);}
+.toast.info{border-color:var(--blue);color:var(--blue);}
+
+@media(max-width:480px){
+  .nav{padding:10px 14px;}
+  .page{padding:13px;}
+  .today-title{font-size:20px;}
+  .conn-wrap{gap:4px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">HY · 운동관리</div>
+  <div class="nav-right">
+    <div class="conn-wrap">
+      <div class="conn-item">
+        <div class="conn-dot" id="gcal-dot"></div>
+        <span id="gcal-lbl" style="color:var(--muted);">캘린더</span>
+      </div>
+      <div class="conn-item">
+        <div class="conn-dot" id="gsheet-dot"></div>
+        <span id="gsheet-lbl" style="color:var(--muted);">시트</span>
+      </div>
+      <button class="conn-btn" id="conn-btn" onclick="handleAuth()">구글 연결</button>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPage('today')">오늘</button>
+      <button class="nav-tab" onclick="showPage('calendar')">캘린더</button>
+      <button class="nav-tab" onclick="showPage('log')">기록</button>
+      <button class="nav-tab" onclick="showPage('stats')">통계</button>
+    </div>
+  </div>
+</nav>
+
+<!-- 오늘 -->
+<div class="page active" id="page-today">
+  <div class="today-meta" id="today-meta"></div>
+  <div class="today-title" id="today-title">오늘의 루틴</div>
+  <div class="today-type" id="today-type"></div>
+  <div class="day-sel" id="day-sel"></div>
+  <div class="prog-wrap">
+    <div class="prog-info">
+      <span id="prog-txt">0 / 0 완료</span>
+      <button style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;" onclick="resetAll()">초기화</button>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div id="routine-content"></div>
+  <div class="bottom-bar" id="bottom-bar" style="display:none;">
+    <div class="cond-row">
+      <span class="cond-lbl">컨디션</span>
+      <button class="cond-btn" onclick="setCond(1)">⭐</button>
+      <button class="cond-btn" onclick="setCond(2)">⭐⭐</button>
+      <button class="cond-btn active" onclick="setCond(3)">⭐⭐⭐</button>
+      <button class="cond-btn" onclick="setCond(4)">⭐⭐⭐⭐</button>
+      <button class="cond-btn" onclick="setCond(5)">⭐⭐⭐⭐⭐</button>
+    </div>
+    <textarea class="memo-inp" id="memo-inp" placeholder="메모 (통증 부위, 특이사항...)"></textarea>
+    <button class="save-btn" id="save-btn" onclick="saveRecord()">💾 저장</button>
+  </div>
+</div>
+
+<!-- 캘린더 -->
+<div class="page" id="page-calendar">
+  <div class="cal-hdr">
+    <div class="cal-title" id="cal-title"></div>
+    <div class="cal-navs">
+      <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+      <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+    </div>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div id="cal-detail"></div>
+</div>
+
+<!-- 기록 -->
+<div class="page" id="page-log">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div style="font-size:17px;font-weight:700;">운동 기록</div>
+    <span style="font-size:11px;color:var(--muted);font-family:var(--mono);" id="log-count"></span>
+  </div>
+  <div id="log-list"></div>
+</div>
+
+<!-- 통계 -->
+<div class="page" id="page-stats">
+  <div style="margin-bottom:16px;">
+    <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;">OVERVIEW</div>
+    <div style="font-size:21px;font-weight:900;">운동 통계</div>
+  </div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div style="margin-bottom:10px;font-size:13px;font-weight:700;">루틴별 횟수</div>
+  <div id="type-stats"></div>
+  <div style="margin:20px 0 10px;font-size:13px;font-weight:700;">💪 중량 성장 추이</div>
+  <div id="weight-history"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════
+// 설정
+// ════════════════════════════════
+const CLIENT_ID = '512897160383-7dn4ti8i5q8m4aj3eh0j1b53pvm680un.apps.googleusercontent.com';
+const SHEET_ID  = '1YvdOYURrgUGNC8C8yJOUoHfiX-94he55Aeqmp4ML_Qk';
+const SHEET_NAME = '운동기록';
+const SCOPES = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/spreadsheets';
+const GCAL_API = 'https://www.googleapis.com/calendar/v3';
+const GSHEET_API = 'https://sheets.googleapis.com/v4/spreadsheets';
+
+let tokenClient = null, accessToken = null, isConnected = false;
+
+// ════════════════════════════════
+// 구글 인증
+// ════════════════════════════════
+function initGoogle() {
+  try {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: async (r) => {
+        if (r.error) { showToast('구글 로그인 실패: ' + r.error, 'error'); return; }
+        accessToken = r.access_token;
+        isConnected = true;
+        updateConnUI(true);
+        showToast('✅ 구글 연결 완료! 캘린더 + 시트 동기화 준비됨', 'success');
+        document.getElementById('save-btn').textContent = '💾 저장 + 📅 캘린더 + 📊 시트';
+        await ensureSheetHeader();
+      }
+    });
+  } catch(e) { console.log('Google init error:', e); }
+}
+
+function handleAuth() {
+  if (isConnected) {
+    accessToken = null; isConnected = false;
+    updateConnUI(false);
+    showToast('연결 해제됨', 'info');
+    document.getElementById('save-btn').textContent = '💾 저장';
+    return;
+  }
+  if (!tokenClient) { showToast('잠시 후 다시 시도해주세요', 'info'); return; }
+  tokenClient.requestAccessToken();
+}
+
+function updateConnUI(on) {
+  ['gcal','gsheet'].forEach(id => {
+    document.getElementById(id+'-dot').className = 'conn-dot' + (on?' on':'');
+    document.getElementById(id+'-lbl').style.color = on ? 'var(--green)' : 'var(--muted)';
+  });
+  const btn = document.getElementById('conn-btn');
+  btn.textContent = on ? '연결해제' : '구글 연결';
+  btn.className = 'conn-btn' + (on?' on':'');
+}
+
+// ════════════════════════════════
+// 구글 캘린더
+// ════════════════════════════════
+async function addToGcal(rec, rt) {
+  if (!isConnected) return null;
+  try {
+    const setsStr = rec.sets && rec.sets.length
+      ? rec.sets.map(s => `세트${s.set}: ${s.weight||'?'}kg × ${s.reps||'?'}회`).join('\n')
+      : '(중량 미기록)';
+    const desc = `💪 ${rt.title}\n\n✅ ${rec.exDone}/${rec.exTotal} 운동 완료\n${'⭐'.repeat(rec.cond||3)}\n\n${setsStr}${rec.memo?'\n\n📝 '+rec.memo:''}\n\n— 운동관리 앱 자동 기록`;
+    const colorMap = {A:'9',B:'10',C:'6',D:'5',E:'11',F:'6'};
+    const event = {
+      summary: `💪 [${rec.type}] ${rt.title}`,
+      description: desc,
+      start: { dateTime: rec.date+'T07:00:00', timeZone: 'Asia/Seoul' },
+      end:   { dateTime: rec.date+'T08:00:00', timeZone: 'Asia/Seoul' },
+      colorId: colorMap[rec.type] || '9'
+    };
+    const res = await fetch(`${GCAL_API}/calendars/primary/events`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer '+accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(event)
+    });
+    if (!res.ok) return null;
+    return (await res.json()).id;
+  } catch(e) { return null; }
+}
+
+async function deleteFromGcal(eid) {
+  if (!isConnected || !eid) return;
+  try {
+    await fetch(`${GCAL_API}/calendars/primary/events/${eid}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer '+accessToken }
+    });
+  } catch(e) {}
+}
+
+// ════════════════════════════════
+// 구글 시트
+// ════════════════════════════════
+async function ensureSheetHeader() {
+  if (!isConnected) return;
+  try {
+    const res = await fetch(`${GSHEET_API}/${SHEET_ID}/values/${SHEET_NAME}!A1:Z1`, {
+      headers: { 'Authorization': 'Bearer '+accessToken }
+    });
+    const data = await res.json();
+    if (!data.values || !data.values[0] || data.values[0].length === 0) {
+      // 헤더 생성
+      const headers = [['날짜','요일','루틴타입','루틴명','완료운동수','전체운동수','컨디션','메모','운동명','세트','중량(kg)','횟수','Phase','저장시간']];
+      await fetch(`${GSHEET_API}/${SHEET_ID}/values/${SHEET_NAME}!A1:N1?valueInputOption=RAW`, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer '+accessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: headers })
+      });
+      showToast('📊 구글 시트 헤더 생성 완료!', 'success');
+    }
+  } catch(e) { console.log('Sheet header error:', e); }
+}
+
+async function saveToSheet(rec, rt) {
+  if (!isConnected) return false;
+  try {
+    const today = new Date();
+    const dayKR = ['일','월','화','수','목','금','토'];
+    const dow = new Date(rec.date).getDay();
+    const savedAt = today.toLocaleString('ko-KR');
+    const stars = '⭐'.repeat(rec.cond||3);
+
+    let rows = [];
+    if (rec.sets && rec.sets.length > 0) {
+      rec.sets.forEach(s => {
+        rows.push([
+          rec.date, dayKR[dow], rec.type, rt.title,
+          rec.exDone, rec.exTotal, stars, rec.memo||'',
+          s.ex, s.set, s.weight||'', s.reps||'',
+          rec.phase||'phase2', savedAt
+        ]);
+      });
+    } else {
+      rows.push([
+        rec.date, dayKR[dow], rec.type, rt.title,
+        rec.exDone, rec.exTotal, stars, rec.memo||'',
+        '', '', '', '', rec.phase||'phase2', savedAt
+      ]);
+    }
+
+    const res = await fetch(`${GSHEET_API}/${SHEET_ID}/values/${SHEET_NAME}!A:N:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer '+accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: rows })
+    });
+    return res.ok;
+  } catch(e) { console.log('Sheet save error:', e); return false; }
+}
+
+// ════════════════════════════════
+// 운동 데이터
+// ════════════════════════════════
+const RT = {
+  A: { label:'월요일 · TypeA', title:'가슴 · 어깨 · 삼두 + 복근', color:'rh-a', muscles:['대흉근','삼각근','삼두근','복직근'],
+    sections:[
+      {n:'워밍업', exs:[{n:'업라이트 바이크',d:'5분 · 저강도',tags:['심폐'],w:['무릎주의'],sets:0}]},
+      {n:'가슴', exs:[
+        {n:'시티드 체스트 프레스',d:'4세트 × 12회',tags:['대흉근(주)','삼두근(보조)'],w:[],sets:4},
+        {n:'케이블 체스트 플라이',d:'3세트 × 15회',tags:['대흉근(주)'],w:[],sets:3}
+      ]},
+      {n:'어깨', exs:[
+        {n:'시티드 숄더 프레스',d:'3세트 × 12회 · 귀높이까지',tags:['삼각근(주)'],w:['어깨주의'],sets:3},
+        {n:'케이블 사이드 레터럴',d:'3세트 × 15회',tags:['측면삼각근(주)'],w:['어깨주의'],sets:3}
+      ]},
+      {n:'복근', exs:[
+        {n:'크런치',d:'3세트 × 20회',tags:['복직근상부(주)'],w:[],sets:3},
+        {n:'레그 레이즈',d:'3세트 × 15회',tags:['복직근하부(주)'],w:['허리주의'],sets:3},
+        {n:'데드버그',d:'3세트 × 10회',tags:['복횡근(주)'],w:['허리주의'],sets:3}
+      ]},
+      {n:'마무리', exs:[{n:'마무리 스트레칭',d:'5분',tags:['회복'],w:[],sets:0}]}
+    ]},
+  B: { label:'화요일 · TypeB', title:'등 · 이두 · 후면어깨 + 코어', color:'rh-b', muscles:['광배근','승모근','이두근','후면삼각근'],
+    sections:[
+      {n:'워밍업', exs:[{n:'업라이트 바이크',d:'5분',tags:['심폐'],w:['무릎주의'],sets:0}]},
+      {n:'등', exs:[
+        {n:'랫 풀다운',d:'4세트 × 12회',tags:['광배근(주)','이두근(보조)'],w:['어깨주의'],sets:4},
+        {n:'시티드 케이블 로우',d:'3세트 × 12회',tags:['광배근(주)'],w:['허리주의'],sets:3}
+      ]},
+      {n:'후면 어깨', exs:[
+        {n:'시티드 리어 델트 플라이',d:'3세트 × 15회',tags:['후면삼각근(주)'],w:['어깨주의'],sets:3}
+      ]},
+      {n:'이두', exs:[{n:'시티드 덤벨 컬',d:'3세트 × 12회',tags:['이두근(주)'],w:[],sets:3}]},
+      {n:'코어', exs:[
+        {n:'플랭크',d:'3세트 × 45초',tags:['복횡근(주)'],w:[],sets:0},
+        {n:'바이시클 크런치',d:'3세트 × 20회',tags:['복사근(주)'],w:[],sets:0},
+        {n:'사이드 플랭크',d:'2세트 × 30초',tags:['외복사근(주)'],w:['허리주의'],sets:0}
+      ]},
+      {n:'마무리', exs:[{n:'마무리 스트레칭',d:'5분',tags:['회복'],w:[],sets:0}]}
+    ]},
+  C: { label:'수요일 · TypeC', title:'하체 · 둔근 · 무릎재활', color:'rh-c', muscles:['대둔근','중둔근','대퇴사두근','햄스트링'],
+    sections:[
+      {n:'워밍업', exs:[{n:'업라이트 바이크',d:'10분',tags:['심폐+무릎준비'],w:['무릎주의'],sets:0}]},
+      {n:'둔근 · 고관절', exs:[
+        {n:'힙 어브덕션 (기계)',d:'4세트 × 15회',tags:['중둔근(주)'],w:['무릎주의'],sets:4},
+        {n:'누워서 브릿지',d:'4세트 × 20회',tags:['대둔근(주)'],w:['허리주의'],sets:0},
+        {n:'클램쉘 (밴드)',d:'3세트 × 20회',tags:['중둔근(주)'],w:[],sets:0},
+        {n:'사이드 라잉 레그 레이즈',d:'3세트 × 15회',tags:['중둔근(주)'],w:[],sets:0},
+        {n:'케이블 킥백',d:'3세트 × 15회',tags:['대둔근(주)'],w:['허리주의'],sets:3}
+      ]},
+      {n:'하체 (의사확인 후)', exs:[
+        {n:'시티드 레그 프레스(초경량)',d:'3세트 × 12회 · ⚠️의사확인!',tags:['대퇴사두근(주)'],w:['무릎주의'],sets:3}
+      ]},
+      {n:'마무리', exs:[{n:'폼롤러+피전포즈',d:'10분',tags:['회복'],w:[],sets:0}]}
+    ]},
+  D: { label:'목요일 · TypeD', title:'유산소 + 척추·경추 회복', color:'rh-d', muscles:['심폐','척추','경추','고관절'],
+    sections:[
+      {n:'유산소', exs:[{n:'업라이트 바이크',d:'20분 · 저강도',tags:['심폐','체지방'],w:['무릎주의'],sets:0}]},
+      {n:'경추 강화', exs:[
+        {n:'친 턱 당기기 (Chin Tuck)',d:'3세트 × 15회',tags:['경추심부굴곡근(주)'],w:[],sets:0},
+        {n:'목 등척성 운동',d:'전후좌우 각 10초 × 3세트',tags:['경추안정근(주)'],w:[],sets:0}
+      ]},
+      {n:'척추 이완', exs:[
+        {n:'폼롤러 흉추 이완',d:'등 중간 부분만',tags:['흉추가동성'],w:['허리주의'],sets:0},
+        {n:'고양이-소 스트레칭',d:'10회',tags:['척추유연성'],w:['허리주의'],sets:0},
+        {n:'맥켄지 운동',d:'10회 · 엎드려 기지개',tags:['요추안정화'],w:['허리주의'],sets:0}
+      ]},
+      {n:'이완', exs:[
+        {n:'피전 포즈',d:'양쪽 각 60초',tags:['대둔근이완'],w:[],sets:0},
+        {n:'누워서 무릎 당기기',d:'양쪽 각 30초',tags:['허리압박해소'],w:['무릎주의'],sets:0},
+        {n:'밴드 풀어파트',d:'3세트 × 15회',tags:['후면삼각근(주)'],w:['어깨주의'],sets:0}
+      ]}
+    ]},
+  E: { label:'금요일 · TypeE', title:'전신복합 + 복근 집중', color:'rh-e', muscles:['복직근','복사근','광배근','삼각근','중둔근'],
+    sections:[
+      {n:'워밍업', exs:[{n:'업라이트 바이크',d:'5분',tags:['심폐'],w:['무릎주의'],sets:0}]},
+      {n:'복근 집중', exs:[
+        {n:'케이블 크런치',d:'4세트 × 20회',tags:['복직근(주)'],w:['허리주의'],sets:4},
+        {n:'행잉 니 레이즈',d:'3세트 × 15회',tags:['복직근하부(주)'],w:[],sets:0},
+        {n:'바이시클 크런치',d:'3세트 × 30회',tags:['복사근(주)'],w:[],sets:0},
+        {n:'리버스 크런치',d:'3세트 × 15회',tags:['복직근하부(주)'],w:['허리주의'],sets:0}
+      ]},
+      {n:'전신 복합', exs:[
+        {n:'시티드 케이블 로우',d:'3세트 × 12회',tags:['광배근(주)'],w:['허리주의'],sets:3},
+        {n:'덤벨 숄더 프레스',d:'3세트 × 12회',tags:['삼각근(주)'],w:['어깨주의'],sets:3},
+        {n:'힙 어브덕션 (기계)',d:'3세트 × 15회',tags:['중둔근(주)'],w:['무릎주의'],sets:3}
+      ]},
+      {n:'마무리 유산소', exs:[{n:'업라이트 바이크',d:'10분 · 중강도',tags:['체지방연소'],w:['무릎주의'],sets:0}]}
+    ]},
+  F: { label:'토요일 · TypeF', title:'하체 · 둔근 2회차 (경량)', color:'rh-f', muscles:['대둔근','중둔근','햄스트링'],
+    sections:[
+      {n:'워밍업', exs:[{n:'업라이트 바이크',d:'10분',tags:['심폐'],w:['무릎주의'],sets:0}]},
+      {n:'둔근 (경량)', exs:[
+        {n:'힙 어브덕션 (기계)',d:'3세트 × 15회 · 중량 낮게',tags:['중둔근(주)'],w:['무릎주의'],sets:3},
+        {n:'누워서 브릿지',d:'3세트 × 20회',tags:['대둔근(주)'],w:['허리주의'],sets:0},
+        {n:'클램쉘 (밴드)',d:'3세트 × 20회',tags:['중둔근(주)'],w:[],sets:0},
+        {n:'케이블 킥백',d:'3세트 × 15회',tags:['대둔근(주)'],w:['허리주의'],sets:3}
+      ]},
+      {n:'마무리', exs:[{n:'전신 스트레칭',d:'10분',tags:['회복'],w:[],sets:0}]}
+    ]},
+  REST: { label:'일요일', title:'완전 휴식', color:'rh-rest', muscles:['전신회복'], sections:[] }
+};
+
+// 요일 → 루틴 (0=일, 1=월, ... 6=토)
+const DAY_SCHED = {0:'REST',1:'A',2:'B',3:'C',4:'D',5:'E',6:'F'};
+const DAY_KR = ['일','월','화','수','목','금','토'];
+const SK = 'hanyoung_v5';
+
+let selDay = new Date().getDay();
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let selCond = 3;
+let records = [];
+let setData = {};
+
+function loadRecs() { try { records = JSON.parse(localStorage.getItem(SK)||'[]'); } catch { records=[]; } }
+function saveRecs() { try { localStorage.setItem(SK, JSON.stringify(records)); } catch {} }
+
+// 날짜 유틸 — 요일 기준 이번 주 날짜 계산 (버그 수정)
+function getDateForDow(targetDow) {
+  const today = new Date();
+  const todayDow = today.getDay();
+  const diff = targetDow - todayDow;
+  const d = new Date(today);
+  d.setDate(today.getDate() + diff);
+  // 로컬 날짜 문자열 (YYYY-MM-DD)
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ════════════════════════════════
+// 세트 관리
+// ════════════════════════════════
+function exKey(si, ei) { return `${selDay}-${si}-${ei}`; }
+
+function initSetData(tk) {
+  setData = {};
+  const rt = RT[tk];
+  if (!rt || !rt.sections) return;
+  rt.sections.forEach((sec,si) => {
+    sec.exs.forEach((ex,ei) => {
+      if (ex.sets > 0) {
+        const k = exKey(si,ei);
+        setData[k] = Array.from({length:ex.sets}, () => ({weight:'',reps:'',done:false}));
+      }
+    });
+  });
+}
+
+function renderSets(key, cId) {
+  const sets = setData[key];
+  if (!sets) return;
+  const c = document.getElementById(cId);
+  if (!c) return;
+  c.innerHTML = `
+    <div class="sets-hdr"><div>세트</div><div>중량 kg</div><div>횟수</div><div>✓</div></div>
+    ${sets.map((s,i) => `
+      <div class="set-row" id="sr-${key}-${i}">
+        <div class="set-num">${i+1}</div>
+        <input class="set-inp ${s.weight?'filled':''}" type="number" value="${s.weight}" placeholder="0" min="0" step="0.5"
+          oninput="updSet('${key}',${i},'weight',this.value)"/>
+        <input class="set-inp ${s.reps?'filled':''}" type="number" value="${s.reps}" placeholder="0" min="0"
+          oninput="updSet('${key}',${i},'reps',this.value)"/>
+        <button class="set-ok ${s.done?'done':''}" onclick="toggleSetDone('${key}',${i})">✓</button>
+      </div>`).join('')}
+    <button class="add-set" onclick="addSet('${key}','${cId}')">+ 세트 추가</button>`;
+}
+
+function updSet(k,i,f,v) {
+  if (!setData[k]) return;
+  setData[k][i][f] = v;
+  const el = document.querySelector(`#sr-${k}-${i} .set-inp:${f==='weight'?'first':'last'}-of-type`);
+  if (el) el.classList.toggle('filled', !!v);
+}
+
+function toggleSetDone(k,i) {
+  if (!setData[k]) return;
+  setData[k][i].done = !setData[k][i].done;
+  const btn = document.querySelector(`#sr-${k}-${i} .set-ok`);
+  if (btn) btn.classList.toggle('done', setData[k][i].done);
+  // 모든 세트 완료시 운동 카드도 완료 표시
+  const parts = k.split('-');
+  const allDone = setData[k].every(s=>s.done);
+  const card = document.getElementById(`ec-${parts[1]}-${parts[2]}`);
+  const chk = document.getElementById(`echk-${parts[1]}-${parts[2]}`);
+  if (card) card.classList.toggle('done', allDone);
+  if (chk) chk.classList.toggle('done', allDone);
+  updateProg();
+}
+
+function addSet(k,cId) {
+  if (!setData[k]) setData[k]=[];
+  setData[k].push({weight:'',reps:'',done:false});
+  renderSets(k,cId);
+}
+
+// ════════════════════════════════
+// 오늘 페이지
+// ════════════════════════════════
+function initToday() {
+  const now = new Date();
+  const todayDow = now.getDay();
+  const ds = todayStr();
+  const dayNames = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+
+  document.getElementById('today-meta').textContent = ds + ' (' + DAY_KR[todayDow] + ')';
+
+  const sel = document.getElementById('day-sel');
+  sel.innerHTML = '';
+  DAY_KR.forEach((n,i) => {
+    const btn = document.createElement('button');
+    const wds = getDateForDow(i);
+    const hasRec = !!records.find(r => r.date === wds);
+    btn.className = 'day-btn' + (i===selDay?' active':'') + (hasRec?' has-rec':'');
+    btn.textContent = n;
+    btn.onclick = () => { selDay=i; initSetData(DAY_SCHED[i]); renderRoutine(); initToday(); };
+    sel.appendChild(btn);
+  });
+  renderRoutine();
+}
+
+function renderRoutine() {
+  const tk = DAY_SCHED[selDay];
+  const rt = RT[tk];
+  const ds = getDateForDow(selDay);
+  const dayNames = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+
+  document.getElementById('today-title').textContent = rt.title;
+  document.getElementById('today-type').textContent = tk==='REST' ? '휴식일' : `Type ${tk} · ${dayNames[selDay]} · ${ds}`;
+
+  const content = document.getElementById('routine-content');
+  const bottom = document.getElementById('bottom-bar');
+
+  if (tk==='REST') {
+    content.innerHTML = `<div class="rest-card">
+      <div style="font-size:34px;margin-bottom:10px;">😴</div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:7px;">오늘은 휴식일!</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.9;">근육은 쉴 때 성장합니다<br>가벼운 산책 20분 OK<br>단백질 식사 꼭 챙기기</div>
+    </div>`;
+    bottom.style.display='none';
+    document.getElementById('prog-txt').textContent='휴식일';
+    document.getElementById('prog-fill').style.width='0%';
+    return;
+  }
+  bottom.style.display='block';
+
+  let html = `<div class="rh ${rt.color}">
+    <div class="rh-lbl">${rt.label}</div>
+    <div class="rh-title">${rt.title}</div>
+    <div class="rh-muscles">${rt.muscles.map(m=>`<span class="mtag">${m}</span>`).join('')}</div>
+  </div>`;
+
+  rt.sections.forEach((sec,si) => {
+    html += `<div class="sec-lbl">${sec.n}</div>`;
+    sec.exs.forEach((ex,ei) => {
+      const wTags = ex.w.map(w => {
+        if (w.includes('허리')) return `<span class="etag t-back">${w}</span>`;
+        if (w.includes('무릎')) return `<span class="etag t-knee">${w}</span>`;
+        if (w.includes('어깨')) return `<span class="etag t-sh">${w}</span>`;
+        return `<span class="etag t-sub">${w}</span>`;
+      }).join('');
+      const mTags = ex.tags.map(t=>`<span class="etag t-main">${t}</span>`).join('');
+      const k = exKey(si,ei);
+      const hasSets = ex.sets > 0;
+      const saId = `sa-${si}-${ei}`;
+
+      html += `<div class="ex-card" id="ec-${si}-${ei}">
+        <div class="ex-card-hdr" onclick="toggleCard('${si}','${ei}','${k}','${saId}',${hasSets})">
+          <div class="ex-chk" id="echk-${si}-${ei}" onclick="event.stopPropagation();toggleExChk('${si}','${ei}')"></div>
+          <div class="ex-info">
+            <div class="ex-name">${ex.n}</div>
+            <div class="ex-detail">${ex.d}</div>
+            <div class="ex-tags">${mTags}${wTags}</div>
+          </div>
+          ${hasSets ? `<div class="ex-arrow" id="arr-${si}-${ei}">▼</div>` : ''}
+        </div>
+        ${hasSets ? `<div class="sets-area" id="${saId}"></div>` : ''}
+      </div>`;
+    });
+  });
+
+  content.innerHTML = html;
+
+  // 세트 데이터 초기화
+  rt.sections.forEach((sec,si) => {
+    sec.exs.forEach((ex,ei) => {
+      if (ex.sets > 0) {
+        const k = exKey(si,ei);
+        if (!setData[k]) {
+          setData[k] = Array.from({length:ex.sets}, () => ({weight:'',reps:'',done:false}));
+        }
+      }
+    });
+  });
+  updateProg();
+}
+
+function toggleCard(si,ei,k,saId,hasSets) {
+  if (!hasSets) return;
+  const area = document.getElementById(saId);
+  const arr = document.getElementById(`arr-${si}-${ei}`);
+  if (!area) return;
+  const isOpen = area.classList.contains('open');
+  area.classList.toggle('open', !isOpen);
+  if (arr) arr.classList.toggle('open', !isOpen);
+  if (!isOpen) renderSets(k, saId);
+}
+
+function toggleExChk(si,ei) {
+  const chk = document.getElementById(`echk-${si}-${ei}`);
+  const card = document.getElementById(`ec-${si}-${ei}`);
+  chk.classList.toggle('done');
+  card.classList.toggle('done');
+  updateProg();
+}
+
+function updateProg() {
+  const all = document.querySelectorAll('.ex-chk').length;
+  const done = document.querySelectorAll('.ex-chk.done').length;
+  document.getElementById('prog-txt').textContent = `${done} / ${all} 완료`;
+  document.getElementById('prog-fill').style.width = (all ? Math.round(done/all*100) : 0) + '%';
+}
+
+function resetAll() {
+  document.querySelectorAll('.ex-chk').forEach(e=>e.classList.remove('done'));
+  document.querySelectorAll('.ex-card').forEach(e=>e.classList.remove('done'));
+  document.querySelectorAll('.set-ok').forEach(e=>e.classList.remove('done'));
+  document.querySelectorAll('.set-inp').forEach(e=>{e.value='';e.classList.remove('filled');});
+  initSetData(DAY_SCHED[selDay]);
+  updateProg();
+}
+
+function setCond(v) {
+  selCond = v;
+  document.querySelectorAll('.cond-btn').forEach((b,i) => b.classList.toggle('active', i+1===v));
+}
+
+async function saveRecord() {
+  const tk = DAY_SCHED[selDay];
+  if (tk==='REST') return;
+
+  const ds = getDateForDow(selDay);
+  const allSets = [];
+  Object.entries(setData).forEach(([k,sets]) => {
+    const parts = k.split('-');
+    const si=parseInt(parts[1]), ei=parseInt(parts[2]);
+    const rt = RT[tk];
+    if (!rt || !rt.sections[si] || !rt.sections[si].exs[ei]) return;
+    const exName = rt.sections[si].exs[ei].n;
+    sets.forEach((s,idx) => {
+      if (s.weight || s.reps) {
+        allSets.push({ex:exName, set:idx+1, weight:s.weight, reps:s.reps, done:s.done});
+      }
+    });
+  });
+
+  const exDone = document.querySelectorAll('.ex-chk.done').length;
+  const exTotal = document.querySelectorAll('.ex-chk').length;
+  const memo = document.getElementById('memo-inp').value;
+  const rec = { id:Date.now(), date:ds, type:tk, exDone, exTotal, sets:allSets, cond:selCond, memo, phase:'phase2', gcalId:null, sheetSaved:false };
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled=true; btn.textContent='저장 중...';
+
+  // 구글 캘린더
+  if (isConnected) {
+    showToast('📅 구글 캘린더 등록 중...', 'info');
+    const gid = await addToGcal(rec, RT[tk]);
+    if (gid) { rec.gcalId=gid; }
+  }
+
+  // 구글 시트
+  if (isConnected) {
+    showToast('📊 구글 시트 저장 중...', 'info');
+    const ok = await saveToSheet(rec, RT[tk]);
+    rec.sheetSaved = ok;
+    if (ok) showToast('✅ 저장 완료! 캘린더 + 시트 모두 기록됨', 'success');
+    else showToast('⚠️ 앱 저장 완료 (시트 저장 실패)', 'error');
+  } else {
+    showToast('💾 저장 완료! (구글 연결 시 시트도 저장)', 'info');
+  }
+
+  records = records.filter(r => r.date !== ds);
+  records.unshift(rec);
+  saveRecs();
+
+  btn.disabled=false;
+  btn.textContent = isConnected ? '💾 저장 + 📅 캘린더 + 📊 시트' : '💾 저장';
+  document.getElementById('memo-inp').value='';
+  initToday(); renderLog(); renderStats();
+}
+
+// ════════════════════════════════
+// 캘린더
+// ════════════════════════════════
+function renderCalendar() {
+  const mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('cal-title').textContent = `${calYear}년 ${mN[calMonth]}`;
+  const ts = todayStr();
+  const firstDow = new Date(calYear,calMonth,1).getDay();
+  const dim = new Date(calYear,calMonth+1,0).getDate();
+
+  let html = DAY_KR.map(d=>`<div class="cal-dlbl">${d}</div>`).join('');
+  for (let i=0;i<firstDow;i++) html+=`<div class="cal-cell empty"></div>`;
+
+  for (let d=1;d<=dim;d++) {
+    const y=calYear, m=String(calMonth+1).padStart(2,'0'), dd=String(d).padStart(2,'0');
+    const ds=`${y}-${m}-${dd}`;
+    const dow = new Date(calYear,calMonth,d).getDay();
+    const tk = DAY_SCHED[dow];
+    const rec = records.find(r=>r.date===ds);
+    const isToday = ds===ts, isRest=tk==='REST';
+    html += `<div class="cal-cell${isToday?' today':''}${rec?' has-rec':''}${isRest&&!rec?' rest-day':''}" onclick="showCalDetail('${ds}')">
+      <div class="cal-date">${d}</div>
+      <div class="cal-type ${isRest?'':tk}">${isRest?'휴':tk}</div>
+      ${rec?'<div class="cal-dot"></div>':''}
+    </div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+  document.getElementById('cal-detail').innerHTML = '';
+}
+
+function changeMonth(dir) {
+  calMonth+=dir;
+  if(calMonth<0){calMonth=11;calYear--;}
+  if(calMonth>11){calMonth=0;calYear++;}
+  renderCalendar();
+}
+
+function showCalDetail(ds) {
+  const rec = records.find(r=>r.date===ds);
+  const dow = new Date(ds+'T12:00:00').getDay();
+  const tk = DAY_SCHED[dow];
+  const detail = document.getElementById('cal-detail');
+
+  if (!rec) {
+    detail.innerHTML = `<div class="cal-detail" style="color:var(--muted);font-size:13px;">${ds} (${DAY_KR[dow]}) — ${tk==='REST'?'휴식일':'기록 없음'}</div>`;
+    return;
+  }
+
+  const setsHtml = rec.sets && rec.sets.length
+    ? `<div style="margin-top:10px;"><div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:5px;">세트별 중량</div>
+       ${rec.sets.map(s=>`<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);font-family:var(--mono);"><span>${s.ex.slice(0,12)}</span><span>세트${s.set}: ${s.weight||'?'}kg × ${s.reps||'?'}회</span></div>`).join('')}</div>`
+    : '';
+
+  detail.innerHTML = `<div class="cal-detail">
+    <div style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:7px;">${ds} (${DAY_KR[dow]})</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">
+      <span class="log-badge b${rec.type}">Type ${rec.type}</span>
+      <span style="font-size:12px;">${'⭐'.repeat(rec.cond||3)}</span>
+      <span style="font-size:12px;color:var(--muted);font-family:var(--mono);">${rec.exDone}/${rec.exTotal}완료</span>
+      ${rec.gcalId?'<span style="font-size:10px;color:var(--blue);">📅</span>':''}
+      ${rec.sheetSaved?'<span style="font-size:10px;color:var(--green);">📊</span>':''}
+    </div>
+    ${setsHtml}
+    ${rec.memo?`<div style="font-size:12px;color:var(--muted);margin-top:8px;">📝 ${rec.memo}</div>`:''}
+  </div>`;
+}
+
+// ════════════════════════════════
+// 기록 페이지
+// ════════════════════════════════
+function renderLog() {
+  document.getElementById('log-count').textContent = `총 ${records.length}회`;
+  const list = document.getElementById('log-list');
+  if (!records.length) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">아직 기록이 없어요.<br>오늘 운동 후 저장해보세요! 💪</div>`;
+    return;
+  }
+  list.innerHTML = records.map(rec => {
+    const setsPreview = rec.sets && rec.sets.length
+      ? rec.sets.slice(0,4).map(s=>`${s.ex.slice(0,6)} ${s.set}세트:${s.weight||'?'}kg×${s.reps||'?'}`).join(' / ')
+      : '';
+    const syncIcons = [rec.gcalId?'📅':'', rec.sheetSaved?'📊':''].filter(Boolean).join(' ');
+    return `<div class="log-item">
+      <div class="log-date">${rec.date}</div>
+      <span class="log-badge b${rec.type}">Type ${rec.type}</span>
+      <div class="log-info">
+        <div class="log-name">${RT[rec.type]?.title||rec.type}</div>
+        <div class="log-sub">${rec.exDone}/${rec.exTotal}완료 · ${'⭐'.repeat(rec.cond||3)}${rec.memo?' · '+rec.memo:''}</div>
+        ${setsPreview?`<div class="log-sets-txt">⚖️ ${setsPreview}</div>`:''}
+        ${syncIcons?`<div class="log-sync">${syncIcons} 동기화됨</div>`:''}
+      </div>
+      <button class="log-del" onclick="delRec(${rec.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+async function delRec(id) {
+  if (!confirm('이 기록을 삭제할까요?')) return;
+  const rec = records.find(r=>r.id===id);
+  if (rec?.gcalId && isConnected) await deleteFromGcal(rec.gcalId);
+  records = records.filter(r=>r.id!==id);
+  saveRecs(); renderLog(); renderCalendar(); renderStats();
+  showToast('삭제 완료', 'info');
+}
+
+// ════════════════════════════════
+// 통계 페이지
+// ════════════════════════════════
+function renderStats() {
+  const total = records.length;
+  const ym = new Date().toISOString().slice(0,7);
+  const thisMonth = records.filter(r=>r.date.startsWith(ym)).length;
+
+  let streak=0;
+  const today = new Date();
+  for (let i=0;i<60;i++) {
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (records.find(r=>r.date===ds)) streak++;
+    else if (i>0) break;
+  }
+  const avg = records.length ? (records.reduce((s,r)=>s+(r.cond||3),0)/records.length).toFixed(1) : '-';
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-unit">회</div><div class="stat-label">총 누적</div></div>
+    <div class="stat-card"><div class="stat-val">${thisMonth}</div><div class="stat-unit">회</div><div class="stat-label">이번 달</div></div>
+    <div class="stat-card"><div class="stat-val">${streak}</div><div class="stat-unit">일</div><div class="stat-label">연속 출석</div></div>
+    <div class="stat-card"><div class="stat-val">${avg}</div><div class="stat-unit">/ 5</div><div class="stat-label">평균 컨디션</div></div>`;
+
+  const tc={};
+  records.forEach(r=>{tc[r.type]=(tc[r.type]||0)+1;});
+  const tL={A:'월(가슴·어깨)',B:'화(등·이두)',C:'수(하체·둔근)',D:'목(유산소·척추)',E:'금(복근·전신)',F:'토(하체경량)'};
+  const tC={A:'var(--blue)',B:'var(--green)',C:'var(--purple)',D:'var(--accent2)',E:'var(--accent)',F:'var(--purple)'};
+  const maxC=Math.max(...Object.values(tc),1);
+  document.getElementById('type-stats').innerHTML = Object.entries(tL).map(([t,lb])=>{
+    const cnt=tc[t]||0;
+    return `<div style="margin-bottom:9px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+        <span style="color:${tC[t]};">${lb}</span>
+        <span style="font-family:var(--mono);color:var(--muted);">${cnt}회</span>
+      </div>
+      <div style="height:5px;background:var(--border);border-radius:3px;">
+        <div style="height:100%;width:${Math.round(cnt/maxC*100)}%;background:${tC[t]};border-radius:3px;transition:width .5s;"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 중량 추이
+  const wMap={};
+  records.forEach(rec=>{
+    if (!rec.sets) return;
+    rec.sets.forEach(s=>{
+      if (!s.weight) return;
+      if (!wMap[s.ex]) wMap[s.ex]=[];
+      wMap[s.ex].push({date:rec.date,weight:parseFloat(s.weight),reps:s.reps});
+    });
+  });
+  const topExs=Object.entries(wMap).sort((a,b)=>b[1].length-a[1].length).slice(0,6);
+  document.getElementById('weight-history').innerHTML = topExs.length
+    ? topExs.map(([ex,arr])=>{
+        const sorted=arr.sort((a,b)=>a.date.localeCompare(b.date));
+        const latest=sorted[sorted.length-1];
+        const first=sorted[0];
+        const diff=+(latest.weight-first.weight).toFixed(1);
+        const diffStr=diff>0?`+${diff}kg↑`:diff<0?`${diff}kg↓`:'유지';
+        const diffColor=diff>0?'var(--green)':diff<0?'var(--accent)':'var(--muted)';
+        return `<div class="w-card">
+          <div class="w-card-top">
+            <span class="w-card-name">${ex}</span>
+            <span class="w-card-diff" style="color:${diffColor};">${diffStr}</span>
+          </div>
+          <div class="w-card-last">최근 ${latest.weight}kg × ${latest.reps||'?'}회 · ${latest.date}</div>
+        </div>`;
+      }).join('')
+    : `<div style="color:var(--muted);font-size:13px;padding:10px;">중량 기록이 쌓이면 여기에 표시됩니다.</div>`;
+}
+
+// ════════════════════════════════
+// 네비게이션 & 토스트
+// ════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='calendar') renderCalendar();
+  if(id==='log') renderLog();
+  if(id==='stats') renderStats();
+}
+
+let tTimer=null;
+function showToast(msg,type='info') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  if(tTimer) clearTimeout(tTimer);
+  tTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ════════════════════════════════
+// 초기화
+// ════════════════════════════════
+window.onload = () => {
+  loadRecs();
+  selDay = new Date().getDay();
+  initSetData(DAY_SCHED[selDay]);
+  initToday();
+
+  const chk = setInterval(() => {
+    if (typeof google !== 'undefined' && google.accounts) {
+      clearInterval(chk);
+      initGoogle();
+    }
+  }, 500);
+};
+</script>
+</body>
+</html>
